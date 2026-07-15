@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>JMV LPS Limited — India's Deep-Tech Infrastructure Intelligence Company</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          navy: { DEFAULT: '#0B132B', panel: '#1C2541', deep: '#070C1B' },
+          crimson: { DEFAULT: '#EF233C', dark: '#D90429', glow: '#FF4D63' },
+          mute: '#94A3B8',
+        },
+        fontFamily: {
+          display: ['"Space Grotesk"', 'sans-serif'],
+          body: ['Inter', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'monospace'],
+        },
+      },
+    },
+  };
+</script>
+
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter', sans-serif; background: #0B132B; }
+
+  .grid-texture {
+    background-image:
+      linear-gradient(rgba(148,163,184,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(148,163,184,0.06) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  .crosshair { position: relative; width: 13px; height: 13px; flex-shrink: 0; }
+  .crosshair::before, .crosshair::after { content: ''; position: absolute; background: currentColor; }
+  .crosshair::before { top: 50%; left: 0; width: 100%; height: 1px; transform: translateY(-50%); }
+  .crosshair::after { left: 50%; top: 0; height: 100%; width: 1px; transform: translateX(-50%); }
+
+  /* Ticker marquee */
+  .ticker-track { animation: ticker-scroll 30s linear infinite; }
+  .ticker-wrap:hover .ticker-track { animation-play-state: paused; }
+  @keyframes ticker-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* live telemetry trace */
+  .trace-path { stroke-dasharray: 900; stroke-dashoffset: 900; animation: draw 3.2s ease-in-out infinite alternate; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+
+  .pulse-dot { animation: pulse-ring 1.8s cubic-bezier(0.4,0,0.6,1) infinite; }
+  @keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0 rgba(34,197,94,0.55); }
+    70% { box-shadow: 0 0 0 9px rgba(34,197,94,0); }
+    100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+  }
+  .pulse-dot-red { animation: pulse-ring-red 1.8s cubic-bezier(0.4,0,0.6,1) infinite; }
+  @keyframes pulse-ring-red {
+    0% { box-shadow: 0 0 0 0 rgba(239,35,60,0.55); }
+    70% { box-shadow: 0 0 0 9px rgba(239,35,60,0); }
+    100% { box-shadow: 0 0 0 0 rgba(239,35,60,0); }
+  }
+
+  .alert-scroll { animation: scroll-up 9s linear infinite; }
+  @keyframes scroll-up { 0% { transform: translateY(0); } 100% { transform: translateY(-50%); } }
+
+  /* discipline cards */
+  .discipline-card { transition: transform .4s cubic-bezier(.16,1,.3,1), border-color .4s ease, box-shadow .4s ease; }
+  .discipline-card:hover {
+    transform: translateY(-8px);
+    border-color: #EF233C;
+    box-shadow: 0 24px 60px -20px rgba(239,35,60,0.35);
+  }
+  .card-detail { max-height: 0; opacity: 0; overflow: hidden; transition: max-height .45s ease, opacity .35s ease; }
+  .discipline-card:hover .card-detail { max-height: 220px; opacity: 1; }
+  .card-glow { opacity: 0; transition: opacity .4s ease; }
+  .discipline-card:hover .card-glow { opacity: 1; }
+
+  .sector-tab-underline { transition: all .3s ease; }
+
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+    outline: 2px solid #EF233C; outline-offset: 2px;
+  }
+
+  #mobile-menu { transition: max-height .35s ease, opacity .3s ease; }
+
+  #back-to-top { transition: opacity .3s ease, transform .3s ease; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .trace-path, .pulse-dot, .pulse-dot-red, .alert-scroll, .ticker-track, .discipline-card, .card-detail { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+
+<body class="bg-navy text-white font-body antialiased">
+
+<!-- ============ NAVIGATION ============ -->
+<header class="sticky top-0 z-50 bg-navy/95 backdrop-blur border-b border-white/8">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8">
+    <div class="flex items-center justify-between h-20">
+
+      <a href="#top" class="flex items-center gap-3 shrink-0">
+        <div class="w-10 h-10 rounded-md bg-white/5 border border-crimson/40 flex items-center justify-center overflow-hidden shrink-0">
+          <img
+            src="https://www.jmv.co.in/images/logo.png"
+            alt="JMV LPS Limited logo"
+            class="w-full h-full object-contain p-1"
+            onerror="this.onerror=null; this.replaceWith(Object.assign(document.createElement('span'), {className:'text-crimson font-display font-bold text-sm tracking-tight', textContent:'JL'}));"
+          />
+        </div>
+        <div class="leading-tight">
+          <p class="font-display font-semibold text-[15px] tracking-wide text-white">JMV LPS LIMITED</p>
+          <p class="text-[10.5px] text-crimson/80 tracking-[0.14em] uppercase">Deep-Tech Engineering</p>
+        </div>
+      </a>
+
+      <nav class="hidden lg:flex items-center gap-9 font-medium text-[14.5px] text-mute">
+        <a href="#engineering-dna" class="hover:text-white transition-colors">Engineering DNA</a>
+        <a href="#iot-sensing" class="hover:text-white transition-colors">IoT Sensing Systems</a>
+        <a href="#sectors" class="hover:text-white transition-colors">Sectors Deployed</a>
+        <a href="#compliance" class="hover:text-white transition-colors">Compliance Vault</a>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <a href="#demo" class="hidden sm:inline-flex items-center gap-2 bg-crimson hover:bg-crimson-dark transition-colors duration-300 text-white text-[13.5px] font-semibold px-5 py-2.5 rounded-md">
+          Schedule Technical Demo
+          <i class="fa-solid fa-arrow-right text-[11px]"></i>
+        </a>
+        <button id="burger-btn" class="lg:hidden w-10 h-10 flex items-center justify-center rounded-md border border-white/15" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+          <i class="fa-solid fa-bars text-white"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="mobile-menu" class="lg:hidden max-h-0 opacity-0 overflow-hidden border-t border-white/8">
+    <nav class="flex flex-col px-5 py-4 gap-1 font-medium text-[15px] text-mute bg-navy">
+      <a href="#engineering-dna" class="py-2.5 border-b border-white/5">Engineering DNA</a>
+      <a href="#iot-sensing" class="py-2.5 border-b border-white/5">IoT Sensing Systems</a>
+      <a href="#sectors" class="py-2.5 border-b border-white/5">Sectors Deployed</a>
+      <a href="#compliance" class="py-2.5 border-b border-white/5">Compliance Vault</a>
+      <a href="#demo" class="mt-3 text-center bg-crimson text-white font-semibold px-5 py-3 rounded-md">Schedule Technical Demo</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ CREDENTIALS TICKER ============ -->
+<div class="ticker-wrap bg-navy-deep bg-[#070C1B] border-b border-white/8 py-3 overflow-hidden">
+  <div class="ticker-track flex items-center gap-0 w-max">
+    <!-- set 1 -->
+    <div class="flex items-center gap-8 px-6">
+      <span class="flex items-center gap-2 text-[12.5px] font-mono text-mute whitespace-nowrap"><i class="fa-solid fa-train text-crimson"></i> RDSO Approved</span>
+      <span class="text-crimson">/</span>
+      <span class="flex items-center gap-2 text-[12.5px] font-mono text-mute whitespace-nowrap"><i class="fa-solid fa-stamp text-crimson"></i> BIS Certified</span>
+      <span class="text-crimson">/</span>
+      <span class="flex items-center gap-2 text-[12.5px] font-mono text-mute whitespace-nowrap"><i class="fa-solid fa-flag text-crimson"></i> Make in India Since 2008</span>
+      <span class="text-crimson">/</span>
+      <span class="flex items-center gap-2 text-[12.5px] font-mono text-mute whitespace-nowrap"><i class="fa-solid fa-certificate text-crimson"></i> ISO 9001 Certified</span>
+      <span class="text-crimson">/</span>
+      <span class="flex items-center gap-2 text-[12.5px] font-mono text-mute whitespace-nowrap"><i class="fa-solid fa-clock text-crimson"></i> 15+ Years on Indian Railways</span>
+      <span class="text-crimson">/</span>
+      <span class="flex items-center gap-2 text-[12.5px] font-mono text-mute whitespace-nowrap"><i class="fa-solid fa-shield-halved text-crimson"></i> 100+ PSUs &amp; Defence Agencies</span>
+      <span class="text-crimson">/</span>
+    </div>
+    <!-- set 2 (duplicate for seamless loop) -->
+    <div class="flex items-center gap-8 px-6">
+      <span class="flex items-center gap-2 text-[12.5px] font-mono text-mute whitespace-nowrap"><i class="fa-solid fa-train text-crimson"></i> RDSO Approved</span>
+      <span class="text-crimson">/</span>
+      <span class="flex items-center gap-2 text-[12.5px] font-mono text-mute whitespace-nowrap"><i class="fa-solid fa-stamp text-crimson"></i> BIS Certified</span>
+      <span class="text-crimson">/</span>
+      <span class="flex items-center gap-2 text-[12.5px] font-mono text-mute whitespace-nowrap"><i class="fa-solid fa-flag text-crimson"></i> Make in India Since 2008</span>
+      <span class="text-crimson">/</span>
+      <span class="flex items-center gap-2 text-[12.5px] font-mono text-mute whitespace-nowrap"><i class="fa-solid fa-certificate text-crimson"></i> ISO 9001 Certified</span>
+      <span class="text-crimson">/</span>
+      <span class="flex items-center gap-2 text-[12.5px] font-mono text-mute whitespace-nowrap"><i class="fa-solid fa-clock text-crimson"></i> 15+ Years on Indian Railways</span>
+      <span class="text-crimson">/</span>
+      <span class="flex items-center gap-2 text-[12.5px] font-mono text-mute whitespace-nowrap"><i class="fa-solid fa-shield-halved text-crimson"></i> 100+ PSUs &amp; Defence Agencies</span>
+      <span class="text-crimson">/</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ HERO ============ -->
+<section id="top" class="relative overflow-hidden bg-navy">
+  <div class="absolute inset-0 grid-texture opacity-70"></div>
+  <div class="absolute -top-32 -right-24 w-[560px] h-[560px] rounded-full bg-crimson/15 blur-[130px]"></div>
+
+  <div class="relative max-w-7xl mx-auto px-5 lg:px-8 pt-16 pb-20 lg:pt-24 lg:pb-28 grid lg:grid-cols-2 gap-14 items-center">
+
+    <div>
+      <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-3.5 py-1.5 text-[12px] font-mono tracking-wide text-crimson mb-7">
+        <span class="w-1.5 h-1.5 rounded-full bg-crimson pulse-dot-red"></span>
+        SINCE 2008 · GRID-TO-CLOUD ENGINEERING
+      </div>
+
+      <h1 class="font-display font-semibold text-[2.4rem] sm:text-5xl lg:text-[3.5rem] leading-[1.06] tracking-tight text-white">
+        India's Deep-Tech
+        <span class="block text-crimson">Infrastructure Intelligence</span>
+        Company.
+      </h1>
+
+      <p class="mt-6 text-[16.5px] leading-relaxed text-mute max-w-lg">
+        Automated, real-time asset tracking and electrical safety infrastructure — designed, engineered, and manufactured entirely under one roof in India. From ground resistance to predictive failure models, JMV LPS runs the intelligence layer beneath the country's critical assets.
+      </p>
+
+      <div class="mt-9 flex flex-wrap gap-4">
+        <a href="#demo" class="inline-flex items-center gap-2 bg-crimson hover:bg-crimson-dark transition-colors duration-300 text-white font-semibold px-6 py-3.5 rounded-md text-[14.5px]">
+          Schedule Technical Demo <i class="fa-solid fa-arrow-right text-[12px]"></i>
+        </a>
+        <a href="#engineering-dna" class="inline-flex items-center gap-2 border border-white/20 hover:border-white/50 transition-colors duration-300 font-semibold px-6 py-3.5 rounded-md text-[14.5px] text-white">
+          Explore Core Systems
+        </a>
+      </div>
+
+      <div class="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-6 border-t border-white/10 pt-8">
+        <div>
+          <p class="font-mono font-bold text-2xl text-crimson">₹250 Cr</p>
+          <p class="text-[12px] text-mute mt-1 leading-snug">Annual Revenue</p>
+        </div>
+        <div>
+          <p class="font-mono font-bold text-2xl text-crimson">53%</p>
+          <p class="text-[12px] text-mute mt-1 leading-snug">YoY Growth</p>
+        </div>
+        <div>
+          <p class="font-mono font-bold text-2xl text-crimson">15+ Yrs</p>
+          <p class="text-[12px] text-mute mt-1 leading-snug">On Indian Railways</p>
+        </div>
+        <div>
+          <p class="font-mono font-bold text-2xl text-crimson">100+</p>
+          <p class="text-[12px] text-mute mt-1 leading-snug">PSUs &amp; Defence Agencies</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Asset Integrity Command Center mockup -->
+    <div class="relative">
+      <div class="rounded-xl border border-white/10 bg-navy-panel shadow-2xl overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-3.5 border-b border-white/10 bg-navy-deep bg-[#070C1B]">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-green-500 pulse-dot"></span>
+            <p class="font-mono text-[12px] text-mute tracking-wide">ASSET INTEGRITY COMMAND CENTER</p>
+          </div>
+          <p class="font-mono text-[11px] text-white/30">NODE 04B2 / LIVE</p>
+        </div>
+
+        <div class="p-5 grid gap-5">
+          <div class="grid grid-cols-3 gap-3">
+            <div class="rounded-md border border-white/10 bg-white/[0.03] p-3">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                <p class="font-mono text-[10.5px] text-mute">GROUND RESISTANCE</p>
+              </div>
+              <p class="font-mono text-lg font-bold text-white">0.8 Ω</p>
+              <p class="text-[10px] text-green-400 font-mono mt-0.5">Normal</p>
+            </div>
+            <div class="rounded-md border border-white/10 bg-white/[0.03] p-3">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                <p class="font-mono text-[10.5px] text-mute">DAS FIBER SENSING</p>
+              </div>
+              <p class="font-mono text-lg font-bold text-white">100%</p>
+              <p class="text-[10px] text-green-400 font-mono mt-0.5">Operational</p>
+            </div>
+            <div class="rounded-md border border-crimson/30 bg-crimson/10 p-3">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-crimson"></span>
+                <p class="font-mono text-[10.5px] text-crimson">SPD ARRAY B4</p>
+              </div>
+              <p class="font-mono text-lg font-bold text-crimson">CHECK</p>
+              <p class="text-[10px] text-crimson/80 font-mono mt-0.5">Flagged</p>
+            </div>
+          </div>
+
+          <div class="rounded-md border border-white/10 bg-white/[0.03] p-3">
+            <p class="font-mono text-[10.5px] text-mute mb-2">SENSOR TELEMETRY — CH.3</p>
+            <svg viewBox="0 0 300 60" class="w-full h-14">
+              <polyline class="trace-path" points="0,40 20,32 35,45 55,20 75,38 95,15 115,42 135,25 155,44 175,18 195,36 215,28 235,46 255,22 275,40 300,30"
+                fill="none" stroke="#EF233C" stroke-width="1.6" />
+            </svg>
+          </div>
+
+          <div class="rounded-md border border-white/10 bg-navy-deep bg-[#070C1B] p-3 h-[92px] overflow-hidden relative">
+            <p class="font-mono text-[10.5px] text-white/40 mb-2">EVENT LOG</p>
+            <div class="alert-scroll font-mono text-[11px] leading-6 text-white/70">
+              <p><span class="text-crimson">[14:02:11]</span> SPD Array B4: <span class="text-crimson">Flagged</span> — Sector 4</p>
+              <p><span class="text-green-400">[14:01:47]</span> Ground resistance within threshold — R1–R6</p>
+              <p><span class="text-white/50">[14:01:22]</span> DAS fiber self-test cycle complete</p>
+              <p><span class="text-white/50">[14:00:58]</span> Predictive model: no anomaly flagged</p>
+              <p><span class="text-crimson">[14:02:11]</span> SPD Array B4: <span class="text-crimson">Flagged</span> — Sector 4</p>
+              <p><span class="text-green-400">[14:01:47]</span> Ground resistance within threshold — R1–R6</p>
+              <p><span class="text-white/50">[14:01:22]</span> DAS fiber self-test cycle complete</p>
+              <p><span class="text-white/50">[14:00:58]</span> Predictive model: no anomaly flagged</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="absolute -bottom-4 -left-4 w-24 h-24 border-l-2 border-b-2 border-crimson/40 rounded-bl-xl hidden sm:block"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ENGINEERING DNA — 4 DISCIPLINES ============ -->
+<section id="engineering-dna" class="relative bg-navy grid-texture py-24 lg:py-28">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8">
+    <div class="max-w-2xl mb-14">
+      <p class="font-mono text-[12.5px] tracking-[0.16em] text-crimson uppercase mb-3">Engineering DNA</p>
+      <h2 class="font-display font-semibold text-3xl lg:text-[2.6rem] tracking-tight leading-tight text-white">
+        Four disciplines. One roof. Zero handoffs.
+      </h2>
+      <p class="mt-4 text-mute text-[15.5px] leading-relaxed">
+        Most vendors integrate components sourced from elsewhere. JMV LPS designs, builds, and codes every layer in-house — from copper in the ground to the model that predicts failure before it happens.
+      </p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
+      <div class="discipline-card relative rounded-xl border border-white/10 bg-navy-panel p-6 overflow-hidden">
+        <div class="card-glow absolute inset-0 bg-gradient-to-br from-crimson/10 to-transparent pointer-events-none"></div>
+        <div class="relative">
+          <div class="flex items-center gap-2 text-crimson mb-5">
+            <span class="crosshair"></span>
+            <span class="font-mono text-[11px] tracking-wide">EE</span>
+          </div>
+          <div class="w-11 h-11 rounded-lg bg-white/5 border border-white/10 text-crimson flex items-center justify-center mb-5">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+          <h3 class="font-display font-semibold text-[17px] mb-2 text-white">Electrical Engineering</h3>
+          <p class="text-[13.5px] text-mute leading-relaxed">Earthing systems, Lightning Protection (LPS), and Surge Protection Devices (SPDs).</p>
+          <div class="card-detail mt-3 pt-3 border-t border-white/10">
+            <ul class="space-y-1.5 text-[12.5px] text-white/70 font-mono">
+              <li>· CDEGS Software modelling</li>
+              <li>· Maintenance-free earthing</li>
+              <li>· Type I–III SPD design</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="discipline-card relative rounded-xl border border-white/10 bg-navy-panel p-6 overflow-hidden">
+        <div class="card-glow absolute inset-0 bg-gradient-to-br from-crimson/10 to-transparent pointer-events-none"></div>
+        <div class="relative">
+          <div class="flex items-center gap-2 text-crimson mb-5">
+            <span class="crosshair"></span>
+            <span class="font-mono text-[11px] tracking-wide">EMB</span>
+          </div>
+          <div class="w-11 h-11 rounded-lg bg-white/5 border border-white/10 text-crimson flex items-center justify-center mb-5">
+            <i class="fa-solid fa-microchip"></i>
+          </div>
+          <h3 class="font-display font-semibold text-[17px] mb-2 text-white">Electronics &amp; Embedded</h3>
+          <p class="text-[13.5px] text-mute leading-relaxed">Custom IoT sensors and field hardware built for harsh operating environments.</p>
+          <div class="card-detail mt-3 pt-3 border-t border-white/10">
+            <ul class="space-y-1.5 text-[12.5px] text-white/70 font-mono">
+              <li>· In-house PCB assembly</li>
+              <li>· DAS / RFMS hardware</li>
+              <li>· Ruggedised enclosures</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="discipline-card relative rounded-xl border border-white/10 bg-navy-panel p-6 overflow-hidden">
+        <div class="card-glow absolute inset-0 bg-gradient-to-br from-crimson/10 to-transparent pointer-events-none"></div>
+        <div class="relative">
+          <div class="flex items-center gap-2 text-crimson mb-5">
+            <span class="crosshair"></span>
+            <span class="font-mono text-[11px] tracking-wide">SW</span>
+          </div>
+          <div class="w-11 h-11 rounded-lg bg-white/5 border border-white/10 text-crimson flex items-center justify-center mb-5">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+          <h3 class="font-display font-semibold text-[17px] mb-2 text-white">Software &amp; AI</h3>
+          <p class="text-[13.5px] text-mute leading-relaxed">SCADA dashboards and predictive-maintenance models trained on live telemetry.</p>
+          <div class="card-detail mt-3 pt-3 border-t border-white/10">
+            <ul class="space-y-1.5 text-[12.5px] text-white/70 font-mono">
+              <li>· Predictive AI/ML models</li>
+              <li>· Real-time SCADA dashboards</li>
+              <li>· RDPMS cloud integration</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="discipline-card relative rounded-xl border border-white/10 bg-navy-panel p-6 overflow-hidden">
+        <div class="card-glow absolute inset-0 bg-gradient-to-br from-crimson/10 to-transparent pointer-events-none"></div>
+        <div class="relative">
+          <div class="flex items-center gap-2 text-crimson mb-5">
+            <span class="crosshair"></span>
+            <span class="font-mono text-[11px] tracking-wide">ME</span>
+          </div>
+          <div class="w-11 h-11 rounded-lg bg-white/5 border border-white/10 text-crimson flex items-center justify-center mb-5">
+            <i class="fa-solid fa-gear"></i>
+          </div>
+          <h3 class="font-display font-semibold text-[17px] mb-2 text-white">Mechanical Engineering</h3>
+          <p class="text-[13.5px] text-mute leading-relaxed">In-house fabrication for every field-deployed housing and structural component.</p>
+          <div class="card-detail mt-3 pt-3 border-t border-white/10">
+            <ul class="space-y-1.5 text-[12.5px] text-white/70 font-mono">
+              <li>· In-house CNC machining</li>
+              <li>· Injection moulding</li>
+              <li>· Rugged case design</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTOR-BASED WORKSPACE SWITCHER ============ -->
+<section id="sectors" class="py-24 lg:py-28 bg-navy-panel relative overflow-hidden">
+  <div class="absolute inset-0 grid-texture opacity-50"></div>
+  <div class="relative max-w-7xl mx-auto px-5 lg:px-8">
+    <div class="max-w-2xl mb-12">
+      <p class="font-mono text-[12.5px] tracking-[0.16em] text-crimson uppercase mb-3">Sectors Deployed</p>
+      <h2 class="font-display font-semibold text-3xl lg:text-[2.6rem] tracking-tight leading-tight text-white">
+        Built for the sectors that can't afford downtime.
+      </h2>
+    </div>
+
+    <div role="tablist" aria-label="Sectors" class="flex flex-wrap gap-2 border-b border-white/10 mb-9">
+      <button class="sector-tab" data-sector="railways" role="tab" aria-selected="true">
+        <span class="sector-tab-underline inline-block px-5 py-3 font-medium text-[14.5px] border-b-2">Railways &amp; Metro</span>
+      </button>
+      <button class="sector-tab" data-sector="defence" role="tab" aria-selected="false">
+        <span class="sector-tab-underline inline-block px-5 py-3 font-medium text-[14.5px] border-b-2">Defence</span>
+      </button>
+      <button class="sector-tab" data-sector="oilgas" role="tab" aria-selected="false">
+        <span class="sector-tab-underline inline-block px-5 py-3 font-medium text-[14.5px] border-b-2">Oil &amp; Gas</span>
+      </button>
+      <button class="sector-tab" data-sector="telecom" role="tab" aria-selected="false">
+        <span class="sector-tab-underline inline-block px-5 py-3 font-medium text-[14.5px] border-b-2">Telecom</span>
+      </button>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-10 items-center">
+
+      <div class="sector-panel" data-panel="railways">
+        <h3 class="font-display font-semibold text-2xl mb-4 text-white">Railways &amp; Metro</h3>
+        <p class="text-mute text-[15px] leading-relaxed mb-6">Fifteen-plus years engineering lightning protection, earthing, and fibre-integrity monitoring across Indian Railways' most critical corridors.</p>
+        <ul class="space-y-3 font-mono text-[13.5px] text-white/80">
+          <li class="flex items-center gap-3"><i class="fa-solid fa-check text-crimson"></i> RDSO Approved installations</li>
+          <li class="flex items-center gap-3"><i class="fa-solid fa-check text-crimson"></i> OFC route fibre-break detection</li>
+          <li class="flex items-center gap-3"><i class="fa-solid fa-check text-crimson"></i> Station &amp; signal-room earthing audits</li>
+        </ul>
+      </div>
+
+      <div class="sector-panel hidden" data-panel="defence">
+        <h3 class="font-display font-semibold text-2xl mb-4 text-white">Defence</h3>
+        <p class="text-mute text-[15px] leading-relaxed mb-6">Ruggedised sensing and perimeter intelligence deployed across sensitive installations, built to defence procurement and security standards.</p>
+        <ul class="space-y-3 font-mono text-[13.5px] text-white/80">
+          <li class="flex items-center gap-3"><i class="fa-solid fa-check text-crimson"></i> Perimeter protection &amp; intrusion sensing</li>
+          <li class="flex items-center gap-3"><i class="fa-solid fa-check text-crimson"></i> Hardened, tamper-evident enclosures</li>
+          <li class="flex items-center gap-3"><i class="fa-solid fa-check text-crimson"></i> 100+ PSU &amp; defence agency deployments</li>
+        </ul>
+      </div>
+
+      <div class="sector-panel hidden" data-panel="oilgas">
+        <h3 class="font-display font-semibold text-2xl mb-4 text-white">Oil &amp; Gas</h3>
+        <p class="text-mute text-[15px] leading-relaxed mb-6">Explosion-aware lightning and surge protection for refineries, tank farms, and pipeline infrastructure operating under continuous risk exposure.</p>
+        <ul class="space-y-3 font-mono text-[13.5px] text-white/80">
+          <li class="flex items-center gap-3"><i class="fa-solid fa-check text-crimson"></i> ATEX-conscious sensor housings</li>
+          <li class="flex items-center gap-3"><i class="fa-solid fa-check text-crimson"></i> Tank-farm earthing &amp; static bonding</li>
+          <li class="flex items-center gap-3"><i class="fa-solid fa-check text-crimson"></i> Real-time SPD health monitoring</li>
+        </ul>
+      </div>
+
+      <div class="sector-panel hidden" data-panel="telecom">
+        <h3 class="font-display font-semibold text-2xl mb-4 text-white">Telecom</h3>
+        <p class="text-mute text-[15px] leading-relaxed mb-6">Tower-site earthing, surge suppression, and remote fibre-monitoring systems keeping national connectivity infrastructure online.</p>
+        <ul class="space-y-3 font-mono text-[13.5px] text-white/80">
+          <li class="flex items-center gap-3"><i class="fa-solid fa-check text-crimson"></i> Tower-site lightning risk audits</li>
+          <li class="flex items-center gap-3"><i class="fa-solid fa-check text-crimson"></i> DAS/RFMS integration for dense sites</li>
+          <li class="flex items-center gap-3"><i class="fa-solid fa-check text-crimson"></i> Remote fibre-cut alerting</li>
+        </ul>
+      </div>
+
+      <div class="rounded-xl border border-white/10 bg-white/[0.03] p-6">
+        <p class="font-mono text-[11px] text-white/40 mb-4 tracking-wide">DEPLOYMENT SNAPSHOT</p>
+        <div id="sector-stat" class="space-y-5">
+          <div class="flex items-baseline justify-between border-b border-white/10 pb-3">
+            <span class="text-mute text-[13.5px]">Sites covered</span>
+            <span class="font-mono font-bold text-xl text-crimson" id="stat-sites">400+</span>
+          </div>
+          <div class="flex items-baseline justify-between border-b border-white/10 pb-3">
+            <span class="text-mute text-[13.5px]">Years active</span>
+            <span class="font-mono font-bold text-xl text-crimson" id="stat-years">15+</span>
+          </div>
+          <div class="flex items-baseline justify-between">
+            <span class="text-mute text-[13.5px]">Compliance standard</span>
+            <span class="font-mono font-bold text-xl text-crimson" id="stat-standard">RDSO</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ IOT SENSING + RISK CALCULATOR (GLASSMORPHISM) ============ -->
+<section id="iot-sensing" class="py-24 lg:py-28 bg-navy relative overflow-hidden">
+  <div class="absolute inset-0 grid-texture opacity-60"></div>
+  <div class="absolute top-1/3 left-1/4 w-[420px] h-[420px] rounded-full bg-crimson/10 blur-[130px]"></div>
+
+  <div class="relative max-w-7xl mx-auto px-5 lg:px-8 grid lg:grid-cols-5 gap-14 items-start">
+
+    <div class="lg:col-span-2">
+      <p class="font-mono text-[12.5px] tracking-[0.16em] text-crimson uppercase mb-3">Lead-in Diagnostic</p>
+      <h2 class="font-display font-semibold text-3xl lg:text-[2.4rem] tracking-tight leading-tight mb-5 text-white">
+        Lightning Risk Assessment Calculator
+      </h2>
+      <p class="text-mute text-[15px] leading-relaxed mb-6">
+        A first-pass estimate of your facility's lightning exposure and IS/IEC 62305 compliance posture — the same framework our field engineers use before a site survey.
+      </p>
+      <div class="flex items-center gap-3 text-[13px] text-white/50 font-mono">
+        <i class="fa-solid fa-circle-info text-crimson"></i>
+        Indicative only — a certified survey follows every request.
+      </div>
+    </div>
+
+    <div class="lg:col-span-3">
+      <div class="rounded-2xl border border-white/15 bg-white/[0.06] backdrop-blur-xl shadow-2xl overflow-hidden">
+        <div class="bg-white/[0.04] border-b border-white/10 px-7 py-4 flex items-center justify-between">
+          <p class="font-mono text-[12px] text-white/70 tracking-wide">STEP 1 OF 1 · FACILITY PROFILE</p>
+          <span class="w-2 h-2 rounded-full bg-green-500 pulse-dot"></span>
+        </div>
+
+        <form id="risk-form" class="p-7 grid sm:grid-cols-2 gap-5">
+          <div class="sm:col-span-1">
+            <label for="facility-type" class="block text-[13px] font-medium text-white/80 mb-1.5">Facility Type</label>
+            <select id="facility-type" class="w-full rounded-md border border-white/15 bg-white/[0.05] text-white px-3.5 py-2.5 text-[14px] focus:ring-2 focus:ring-crimson/50">
+              <option class="text-navy" value="1.4">Railway / Metro Station</option>
+              <option class="text-navy" value="1.6">Defence Installation</option>
+              <option class="text-navy" value="1.8">Oil &amp; Gas Facility</option>
+              <option class="text-navy" value="1.2">Telecom Tower Site</option>
+              <option class="text-navy" value="1.0">Commercial Building</option>
+            </select>
+          </div>
+
+          <div class="sm:col-span-1">
+            <label for="structure-height" class="block text-[13px] font-medium text-white/80 mb-1.5">Structure Height (m)</label>
+            <input id="structure-height" type="number" min="1" value="24" class="w-full rounded-md border border-white/15 bg-white/[0.05] text-white px-3.5 py-2.5 text-[14px] focus:ring-2 focus:ring-crimson/50" />
+          </div>
+
+          <div class="sm:col-span-1">
+            <label for="region" class="block text-[13px] font-medium text-white/80 mb-1.5">Isokeraunic Region</label>
+            <select id="region" class="w-full rounded-md border border-white/15 bg-white/[0.05] text-white px-3.5 py-2.5 text-[14px] focus:ring-2 focus:ring-crimson/50">
+              <option class="text-navy" value="0.9">Low (&lt; 30 thunderstorm days/yr)</option>
+              <option class="text-navy" value="1.1" selected>Moderate (30–60 days/yr)</option>
+              <option class="text-navy" value="1.35">High (&gt; 60 days/yr)</option>
+            </select>
+          </div>
+
+          <div class="sm:col-span-1">
+            <label for="occupancy" class="block text-[13px] font-medium text-white/80 mb-1.5">Occupancy / Criticality</label>
+            <select id="occupancy" class="w-full rounded-md border border-white/15 bg-white/[0.05] text-white px-3.5 py-2.5 text-[14px] focus:ring-2 focus:ring-crimson/50">
+              <option class="text-navy" value="1.0">Standard</option>
+              <option class="text-navy" value="1.2">High footfall / public</option>
+              <option class="text-navy" value="1.4">Mission-critical</option>
+            </select>
+          </div>
+
+          <button type="submit" class="sm:col-span-2 mt-2 bg-crimson hover:bg-crimson-dark transition-colors duration-300 text-white font-semibold py-3.5 rounded-md text-[14.5px] flex items-center justify-center gap-2">
+            Calculate Risk Profile &amp; Compliance <i class="fa-solid fa-bolt"></i>
+          </button>
+        </form>
+
+        <div id="risk-result" class="hidden border-t border-white/10 bg-white/[0.03] px-7 py-6">
+          <div class="flex items-center justify-between mb-4">
+            <p class="font-mono text-[11.5px] text-white/45 tracking-wide">ASSESSMENT OUTPUT</p>
+            <span id="risk-badge" class="font-mono text-[11.5px] font-bold px-3 py-1 rounded-full"></span>
+          </div>
+          <div class="grid sm:grid-cols-3 gap-4">
+            <div>
+              <p class="text-[12px] text-white/50 mb-1">Risk Index</p>
+              <p id="risk-score" class="font-mono font-bold text-2xl text-white">—</p>
+            </div>
+            <div>
+              <p class="text-[12px] text-white/50 mb-1">Recommended LPS Class</p>
+              <p id="risk-class" class="font-mono font-bold text-2xl text-white">—</p>
+            </div>
+            <div>
+              <p class="text-[12px] text-white/50 mb-1">IS/IEC 62305 Status</p>
+              <p id="risk-status" class="font-mono font-bold text-2xl text-white">—</p>
+            </div>
+          </div>
+          <a href="#demo" class="mt-6 inline-flex items-center gap-2 text-crimson font-semibold text-[14px]">
+            Get a certified survey <i class="fa-solid fa-arrow-right text-[11px]"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COMPLIANCE VAULT (badges strip) ============ -->
+<section id="compliance" class="py-16 border-y border-white/10 bg-navy-panel">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8 mb-8 flex items-center justify-between flex-wrap gap-3">
+    <p class="font-mono text-[12.5px] tracking-[0.16em] text-crimson uppercase">Compliance &amp; Credentials Vault</p>
+    <p class="text-white/45 text-[13px]">Every deployment traceable to a certified standard.</p>
+  </div>
+  <div class="max-w-7xl mx-auto px-5 lg:px-8 grid grid-cols-2 sm:grid-cols-5 gap-5">
+    <div class="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-5 flex flex-col items-center gap-2 text-center">
+      <i class="fa-solid fa-train text-crimson text-xl"></i>
+      <span class="font-display font-semibold text-[13px] text-white">RDSO Approved</span>
+    </div>
+    <div class="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-5 flex flex-col items-center gap-2 text-center">
+      <i class="fa-solid fa-stamp text-crimson text-xl"></i>
+      <span class="font-display font-semibold text-[13px] text-white">BIS Certified</span>
+    </div>
+    <div class="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-5 flex flex-col items-center gap-2 text-center">
+      <i class="fa-solid fa-certificate text-crimson text-xl"></i>
+      <span class="font-display font-semibold text-[13px] text-white">ISO 9001</span>
+    </div>
+    <div class="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-5 flex flex-col items-center gap-2 text-center">
+      <i class="fa-solid fa-leaf text-crimson text-xl"></i>
+      <span class="font-display font-semibold text-[13px] text-white">ISO 14001</span>
+    </div>
+    <div class="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-5 flex flex-col items-center gap-2 text-center">
+      <i class="fa-solid fa-flag text-crimson text-xl"></i>
+      <span class="font-display font-semibold text-[13px] text-white">Make in India</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FINAL CTA ============ -->
+<section id="demo" class="py-24 bg-navy relative overflow-hidden">
+  <div class="absolute inset-0 grid-texture opacity-60"></div>
+  <div class="relative max-w-3xl mx-auto px-5 text-center">
+    <h2 class="font-display font-semibold text-3xl lg:text-4xl tracking-tight mb-4 text-white">See the intelligence layer in action.</h2>
+    <p class="text-mute text-[15.5px] mb-9">A technical demo, tailored to your sector — walked through by the engineers who build the systems, not a sales deck.</p>
+    <a href="#" class="inline-flex items-center gap-2 bg-crimson hover:bg-crimson-dark transition-colors duration-300 text-white font-semibold px-7 py-4 rounded-md text-[15px]">
+      Schedule Technical Demo <i class="fa-solid fa-arrow-right text-[12px]"></i>
+    </a>
+  </div>
+</section>
+
+<!-- ============ CORPORATE FOOTER ============ -->
+<footer class="bg-[#070C1B] text-white/60 pt-16 pb-8 relative">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+
+    <!-- Col 1 -->
+    <div>
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-9 h-9 rounded-md bg-white/5 border border-crimson/40 flex items-center justify-center overflow-hidden shrink-0">
+          <img
+            src="https://www.jmv.co.in/images/logo.png"
+            alt="JMV LPS Limited logo"
+            class="w-full h-full object-contain p-1"
+            onerror="this.onerror=null; this.replaceWith(Object.assign(document.createElement('span'), {className:'text-crimson font-display font-bold text-xs', textContent:'JL'}));"
+          />
+        </div>
+        <p class="font-display font-semibold text-white text-[14.5px]">JMV LPS LIMITED</p>
+      </div>
+      <p class="text-[13px] leading-relaxed mb-4">India's deep-tech infrastructure intelligence company — engineering electrical safety and IoT sensing systems since 2008.</p>
+      <p class="text-[13px] leading-relaxed mb-5">
+        <i class="fa-solid fa-location-dot text-crimson mr-2"></i>Corporate Office, Sector 63, Noida, Uttar Pradesh, India
+      </p>
+      <div class="flex items-center gap-3">
+        <a href="#" aria-label="LinkedIn" class="w-9 h-9 rounded-md border border-white/15 flex items-center justify-center hover:border-crimson hover:text-crimson transition-colors"><i class="fa-brands fa-linkedin-in"></i></a>
+        <a href="#" aria-label="Twitter" class="w-9 h-9 rounded-md border border-white/15 flex items-center justify-center hover:border-crimson hover:text-crimson transition-colors"><i class="fa-brands fa-x-twitter"></i></a>
+        <a href="#" aria-label="YouTube" class="w-9 h-9 rounded-md border border-white/15 flex items-center justify-center hover:border-crimson hover:text-crimson transition-colors"><i class="fa-brands fa-youtube"></i></a>
+      </div>
+    </div>
+
+    <!-- Col 2 -->
+    <div>
+      <p class="font-display font-semibold text-white text-[14px] mb-4 tracking-wide">IoT Sensing Ecosystem</p>
+      <ul class="space-y-2.5 text-[13.5px]">
+        <li><a href="#" class="hover:text-crimson transition-colors">RFMS</a></li>
+        <li><a href="#" class="hover:text-crimson transition-colors">DAS</a></li>
+        <li><a href="#" class="hover:text-crimson transition-colors">RDPMS</a></li>
+        <li><a href="#" class="hover:text-crimson transition-colors">ELP Monitoring</a></li>
+        <li><a href="#" class="hover:text-crimson transition-colors">Digital Earthing</a></li>
+      </ul>
+    </div>
+
+    <!-- Col 3 -->
+    <div>
+      <p class="font-display font-semibold text-white text-[14px] mb-4 tracking-wide">Industries Served</p>
+      <ul class="space-y-2.5 text-[13.5px]">
+        <li><a href="#sectors" class="hover:text-crimson transition-colors">Smart Mobility</a></li>
+        <li><a href="#sectors" class="hover:text-crimson transition-colors">Defence</a></li>
+        <li><a href="#" class="hover:text-crimson transition-colors">Power Utilities</a></li>
+        <li><a href="#sectors" class="hover:text-crimson transition-colors">Telecom</a></li>
+        <li><a href="#sectors" class="hover:text-crimson transition-colors">Oil &amp; Gas</a></li>
+      </ul>
+    </div>
+
+    <!-- Col 4 -->
+    <div>
+      <p class="font-display font-semibold text-white text-[14px] mb-4 tracking-wide">Corporate Vault</p>
+      <ul class="space-y-2.5 text-[13.5px]">
+        <li><a href="#compliance" class="hover:text-crimson transition-colors">RDSO Approvals</a></li>
+        <li><a href="#" class="hover:text-crimson transition-colors">Catalogues</a></li>
+        <li><a href="#" class="hover:text-crimson transition-colors">Careers</a></li>
+        <li><a href="#" class="hover:text-crimson transition-colors">Privacy Policy</a></li>
+        <li><a href="#demo" class="hover:text-crimson transition-colors">Contact Us</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-5 lg:px-8 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-[13px]">
+    <p>© 2026 JMV LPS Limited. All rights reserved.</p>
+    <p class="font-mono text-[11.5px] tracking-wide">ENGINEERED IN INDIA · SINCE 2008</p>
+  </div>
+
+  <button id="back-to-top" aria-label="Back to top" class="opacity-0 translate-y-3 pointer-events-none fixed bottom-7 right-7 w-12 h-12 rounded-full bg-crimson hover:bg-crimson-dark flex items-center justify-center shadow-2xl z-40">
+    <i class="fa-solid fa-arrow-up text-white"></i>
+  </button>
+</footer>
+
+<script>
+  // Mobile menu toggle
+  const burgerBtn = document.getElementById('burger-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  let menuOpen = false;
+  burgerBtn.addEventListener('click', () => {
+    menuOpen = !menuOpen;
+    burgerBtn.setAttribute('aria-expanded', String(menuOpen));
+    burgerBtn.innerHTML = menuOpen ? '<i class="fa-solid fa-xmark text-white"></i>' : '<i class="fa-solid fa-bars text-white"></i>';
+    if (menuOpen) {
+      mobileMenu.style.maxHeight = mobileMenu.scrollHeight + 'px';
+      mobileMenu.style.opacity = '1';
+    } else {
+      mobileMenu.style.maxHeight = '0';
+      mobileMenu.style.opacity = '0';
+    }
+  });
+  mobileMenu.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      menuOpen = false;
+      mobileMenu.style.maxHeight = '0';
+      mobileMenu.style.opacity = '0';
+      burgerBtn.innerHTML = '<i class="fa-solid fa-bars text-white"></i>';
+      burgerBtn.setAttribute('aria-expanded', 'false');
+    });
+  });
+
+  // Sector tab switcher
+  const sectorTabs = document.querySelectorAll('.sector-tab');
+  const sectorPanels = document.querySelectorAll('.sector-panel');
+  const sectorData = {
+    railways: { sites: '400+', years: '15+', standard: 'RDSO' },
+    defence:  { sites: '100+', years: '10+', standard: 'MoD' },
+    oilgas:   { sites: '60+',  years: '8+',  standard: 'ATEX' },
+    telecom:  { sites: '250+', years: '9+',  standard: 'TEC' },
+  };
+
+  function activateSector(name) {
+    sectorTabs.forEach(tab => {
+      const isActive = tab.dataset.sector === name;
+      tab.setAttribute('aria-selected', String(isActive));
+      const span = tab.querySelector('span');
+      span.classList.toggle('text-white', isActive);
+      span.classList.toggle('text-mute', !isActive);
+      span.classList.toggle('border-crimson', isActive);
+      span.classList.toggle('border-transparent', !isActive);
+    });
+    sectorPanels.forEach(panel => {
+      panel.classList.toggle('hidden', panel.dataset.panel !== name);
+    });
+    const d = sectorData[name];
+    if (d) {
+      document.getElementById('stat-sites').textContent = d.sites;
+      document.getElementById('stat-years').textContent = d.years;
+      document.getElementById('stat-standard').textContent = d.standard;
+    }
+  }
+
+  sectorTabs.forEach(tab => {
+    tab.addEventListener('click', () => activateSector(tab.dataset.sector));
+    tab.addEventListener('mouseenter', () => activateSector(tab.dataset.sector));
+  });
+  activateSector('railways');
+
+  // Lightning Risk Assessment Calculator (dummy scoring model)
+  const riskForm = document.getElementById('risk-form');
+  riskForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const facility = parseFloat(document.getElementById('facility-type').value);
+    const height = parseFloat(document.getElementById('structure-height').value) || 1;
+    const region = parseFloat(document.getElementById('region').value);
+    const occupancy = parseFloat(document.getElementById('occupancy').value);
+
+    const rawScore = facility * region * occupancy * (1 + height / 100);
+    const score = Math.min(9.8, Math.round(rawScore * 10) / 10);
+
+    let tier, badgeClasses, lpsClass, status;
+    if (score < 1.6) {
+      tier = 'LOW'; badgeClasses = 'bg-green-500/15 text-green-400'; lpsClass = 'Class IV'; status = 'Compliant';
+    } else if (score < 2.4) {
+      tier = 'MODERATE'; badgeClasses = 'bg-yellow-500/15 text-yellow-400'; lpsClass = 'Class III'; status = 'Review Advised';
+    } else {
+      tier = 'ELEVATED'; badgeClasses = 'bg-crimson/15 text-crimson'; lpsClass = 'Class I–II'; status = 'Survey Required';
+    }
+
+    document.getElementById('risk-score').textContent = score.toFixed(1);
+    document.getElementById('risk-class').textContent = lpsClass;
+    document.getElementById('risk-status').textContent = status;
+    const badge = document.getElementById('risk-badge');
+    badge.textContent = tier + ' RISK';
+    badge.className = 'font-mono text-[11.5px] font-bold px-3 py-1 rounded-full ' + badgeClasses;
+
+    const resultBox = document.getElementById('risk-result');
+    resultBox.classList.remove('hidden');
+    resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+
+  // Back to top button
+  const backToTop = document.getElementById('back-to-top');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 600) {
+      backToTop.classList.remove('opacity-0', 'translate-y-3', 'pointer-events-none');
+    } else {
+      backToTop.classList.add('opacity-0', 'translate-y-3', 'pointer-events-none');
+    }
+  });
+  backToTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
+
+</body>
+</html>
